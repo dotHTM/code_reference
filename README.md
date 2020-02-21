@@ -1,4 +1,4 @@
 # Code Reference
 
-Some examples of code and things I've toyed with in various languages.
+Examples of little ideas that I play with in various languages
 
