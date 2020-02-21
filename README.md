@@ -14,6 +14,8 @@ If you opened all the folds, and made each one a right angle, what shape would y
 
 [Vi Hart's exploration](https://www.youtube.com/watch?v=EdyociU35u8)
 
+Continues from [previous project](https://github.com/dotHTM/dragon)
+
 ### Turn lists
 
 The first thing I looked when I discovered this puzzle as a kid was to look at weather the paper turns left or right at a given crease.
