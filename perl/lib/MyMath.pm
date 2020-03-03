@@ -37,9 +37,9 @@ sub quant {
     my ($x)           = @_;
     my $numerator     = 1;
     my $denominator   = 1;
-    my $threshold     = 0.00000001;
+    my $threshold     = 0.000_000_001;
     my $accuracy      = 1;
-    my $safety_limit  = 1000000;
+    my $safety_limit  = 1_000_000;
     my $safety_count  = 0;
     my $calc_accuracy = sub {
         $accuracy = $x - ( $numerator / $denominator );
