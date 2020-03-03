@@ -68,8 +68,8 @@ sub int_root {
     my $result        = 1;
     my $accuracy      = 1;
     my $safety_count  = 0;
-    my $safety_limit  = 1000000;
-    my $threshold     = 0.000000000001;
+    my $safety_limit  = 1_000_000;
+    my $threshold     = 0.000_000_000_001;
     my $calc_accuracy = sub {
         my $shot = int_pow( $result, $n );
         $accuracy = $x - $shot;
@@ -81,10 +81,9 @@ sub int_root {
         $safety_count++;
         carp("Exceeded safety ") unless ( $safety_count < $safety_limit );
         $calc_accuracy->();
-        $result += $accuracy / ( $n * $x );
+        $result += $accuracy / ( $n * $x ); ## I don't understand why this is so efficient!
     }
-    # say "count $safety_count";
-
+    
     return $result;
 }
 
