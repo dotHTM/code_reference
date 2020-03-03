@@ -20,6 +20,9 @@ our @EXPORT = qw(
     deref clone_ref
     kv_pairs hash_from_kv_pairs arrayref_to_indexed_hashref
 
+    seen count_seen
+    shuffle shuffle_cc
+
     reduce_ref append_arrays_ref push_ref overwrite_hashes_ref
     map_ref map_values
     filter_ref
@@ -31,6 +34,8 @@ our @EXPORT = qw(
     map_cc
     reduce_cc
     filter_cc
+
+    do_cc foreach_cc
 
     result_pass_onto
 
@@ -66,11 +71,11 @@ sub clone_ref {
 }    ##    clone_ref
 
 sub arrayref_to_indexed_hashref {
-    my ( $input ) = @_;
-    unit_typecheck("array", $input, "array_to_hash", undef, '$input');
+    my ($input) = @_;
+    unit_typecheck( "array", $input, "array_to_hash", undef, '$input' );
     my $result = {};
-    my $index = 0;
-    foreach my $e (@{$input}) {
+    my $index  = 0;
+    foreach my $e ( @{$input} ) {
         $result->{$index} = $e;
         $index++;
     }
@@ -79,7 +84,7 @@ sub arrayref_to_indexed_hashref {
 
 sub kv_pairs {
     my ($input) = @_;
-    unit_typecheck("hash", $input, 'kv_pairs', undef, '$input');
+    unit_typecheck( "hash", $input, 'kv_pairs', undef, '$input' );
     my $result = [];
     foreach my $key ( keys %{$input} ) {
         push @{$result}, { k => $key, v => $input->{$key} };
@@ -98,6 +103,59 @@ sub hash_from_kv_pairs {
         },
         $input_kv_pairs,
         {}
+    );
+}
+
+sub seen {
+    my ($input_array) = @_;
+    unit_typecheck( "array", $input_array, 'seen', undef, 'input_array' );
+    return chain_ex(
+        $input_array,
+        reduce_cc(
+            sub {
+                my ( $r, $e ) = @_;
+                $r->{$e} = 1;
+                return $r;
+            },
+            {}
+        )
+    );
+}
+
+sub count_seen {
+    my ($input_array) = @_;
+    unit_typecheck( "array", $input_array, 'count_seen', undef,
+        'input_array' );
+    return chain_ex(
+        $input_array,
+        reduce_cc(
+            sub {
+                my ( $r, $e ) = @_;
+                $r->{$e} += 1;
+                return $r;
+            },
+            {}
+        )
+    );
+}
+
+sub shuffle {
+    my ($input_array) = @_;
+    unit_typecheck( "array", $input_array, 'shuffle', undef, 'input_array' );
+    return chain_ex( $input_array, shuffle_cc() );
+}
+
+sub shuffle_cc {
+    return reduce_cc(
+        sub {
+            my ( $r, $e ) = @_;
+            my $length = scalar @{$r};
+            my $split  = rand( $length + 1 );
+            if ( $length < $split ) { push @{$r}, $e; }
+            else                    { splice @{$r}, $split, 0, $e; }
+            return $r;
+        },
+        []
     );
 }
 
@@ -227,10 +285,29 @@ sub filter_cc {
     my ($filterFunction) = @_;
     return sub {
         my ($input) = @_;
-        say "DEBUG " . Dumper $input;
+
+        # say "DEBUG " . Dumper $input;
 
         return filter_c( $filterFunction, $input );
     };
+}
+
+sub do_cc {
+    my ($function) = @_;
+    return sub {
+        my ($input) = @_;
+        $function->($input);
+        return $input;
+    }
+}
+
+sub foreach_cc {
+    my ($function) = @_;
+    return sub {
+        my ($input) = @_;
+        foreach my $e ( @{$input} ) { $function->($e); }
+        return $input;
+    }
 }
 
 sub result_pass_onto {

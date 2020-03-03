@@ -83,7 +83,7 @@ sub int_root {
         $calc_accuracy->();
         $result += $accuracy / ( $n * $x );
     }
-    say "count $safety_count";
+    # say "count $safety_count";
 
     return $result;
 }
